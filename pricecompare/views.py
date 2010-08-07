@@ -1,7 +1,8 @@
 import csv
 
+from django.core.management import call_command
 from django.shortcuts import render_to_response
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from django.template.defaultfilters import floatformat, slugify
 
@@ -9,7 +10,7 @@ from pricecompare.models import *
 
 def index(request):
     extra_context = {
-        'groups': ProductGroup.objects.all()
+        'groups': ProductGroup.objects.order_by('name')
     }
     
     return render_to_response(
@@ -69,3 +70,7 @@ def detail_csv(request, id):
         
     return response
     
+def update(request):
+    print request.GET.get('redirect_to', '/')
+    call_command('getprices')
+    return HttpResponseRedirect(request.GET.get('redirect_to', '/'))

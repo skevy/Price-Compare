@@ -63,7 +63,7 @@ def detail_csv(request, id):
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % (slugify(g.name))
     
     writer = csv.writer(response)
-    products = Product.objects.filter(product_group=g)
+    products = Product.objects.filter(product_group=g).order_by('price')
     for p in products:
         writer.writerow([p.product_group.name, p.source.name, p.url, floatformat(p.price, 2)])
         

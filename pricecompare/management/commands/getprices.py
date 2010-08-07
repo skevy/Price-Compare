@@ -9,7 +9,11 @@ from pricecompare.models import *
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        groups = ProductGroup.objects.all()
+        if args:
+            groups = ProductGroup.objects.filter(pk__in=list(args))
+        else:
+            groups = ProductGroup.objects.all()
+            
         for g in groups:
             products = Product.objects.filter(product_group=g)
             for p in products:

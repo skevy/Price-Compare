@@ -72,5 +72,8 @@ def detail_csv(request, id):
     
 def update(request):
     print request.GET.get('redirect_to', '/')
-    call_command('getprices')
+    if request.GET.get('group_id', None):
+        call_command('getprices', request.GET.get('group_id'))
+    else:
+        call_command('getprices')
     return HttpResponseRedirect(request.GET.get('redirect_to', '/'))

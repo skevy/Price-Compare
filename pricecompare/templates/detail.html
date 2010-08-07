@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block update %}
+<a href="/update/?redirect_to={{ request.build_absolute_uri }}&group_id={{ products.0.product_group.pk }}">Update Prices for {{ products.0.product_group.name }}</a>
+{% endblock %}
+
 {% block content %}
 <h2>{{ products.0.product_group.name }}</h2>
 <table cellpadding="0" cellspacing="0">

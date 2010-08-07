@@ -7,7 +7,8 @@ admin.autodiscover()
 urlpatterns = patterns('',
     (r'^$', 'pricecompare.views.index'),
     (r'^groups/(?P<id>\d+)/$', 'pricecompare.views.detail'),
-    (r'^groups/(?P<id>\d+)/csv/$', 'pricecompare.views.detail_csv'),
+    (r'^viewall/$', 'pricecompare.views.viewall'),
+    (r'^csv/((?P<id>\d+)/)?$', 'pricecompare.views.write_csv'),
     (r'^update/$', 'pricecompare.views.update'),
     (r'^admin/', include(admin.site.urls)),
 )

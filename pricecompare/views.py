@@ -20,8 +20,10 @@ def index(request):
     )
     
 def detail(request, id):
-    g = ProductGroup.objects.get(pk=id)
     order = {}
+    
+    detail = _get_group_detail(id)
+    
     if 'sort' in request.GET:
         field, direction = request.GET['sort'].split(":")
         print direction
@@ -31,23 +33,15 @@ def detail(request, id):
         else:
             order_by = "-%s" % field
             order[field] = "ASC"
-        products = Product.objects.filter(product_group=g).order_by(order_by)
+        products = detail['products'].order_by(order_by)
     else:
-        products = Product.objects.filter(product_group=g).order_by('price')
-        order['source'] = "DESC"
+        products = detail['products'].order_by('price')
+        order['source'] = "ASC"
         order['price'] = "DESC"
         
-    candidates = products.filter(got_price=True)
-        
-    cheapest = 0
-    
-    for i, p in enumerate(candidates):
-        if p.price < candidates[cheapest].price:
-            cheapest = i
-        
     extra_context = {
-        'cheapest': candidates[cheapest].pk,
         'products': products,
+        'cheapest': detail['cheapest'],
         'order': order,
     }
     
@@ -57,14 +51,57 @@ def detail(request, id):
         context_instance=RequestContext(request),
     )
     
-def detail_csv(request, id):
-    g = ProductGroup.objects.get(pk=id)
+def viewall(request):
+    groups = []
+    for g in ProductGroup.objects.all():
+        d = _get_group_detail(g.pk)
+        groups.append({
+            'id': g.pk,
+            'name': g.name,
+            'products': d['products'].order_by('price'),
+            'cheapest': d['cheapest'],
+        })
+        
+    extra_context = {
+        'groups': groups,
+    }
     
+    return render_to_response(
+        'viewall.html',
+        extra_context,
+        context_instance=RequestContext(request),
+    )
+    
+def _get_group_detail(id):
+    g = ProductGroup.objects.get(pk=id)
+    products = Product.objects.filter(product_group=g)
+    candidates = products.filter(got_price=True)
+
+    cheapest = 0
+
+    for i, p in enumerate(candidates):
+        if p.price < candidates[cheapest].price:
+            cheapest = i
+
+    return {
+        'cheapest': candidates[cheapest].pk,
+        'products': products,
+    }
+    
+def write_csv(request, id=None):
     response = HttpResponse(mimetype='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=%s.csv' % (slugify(g.name))
+    if id:
+        g = ProductGroup.objects.get(pk=id)
+        products = Product.objects.filter(product_group=g).order_by('price')
+        response['Content-Disposition'] = 'attachment; filename=%s.csv' % (slugify(g.name))
+    else:
+        groups = ProductGroup.objects.all()
+        products = []
+        for g in groups:
+            products.extend(Product.objects.filter(product_group=g).order_by('price'))
+        response['Content-Disposition'] = 'attachment; filename=allproducts.csv'
     
     writer = csv.writer(response)
-    products = Product.objects.filter(product_group=g).order_by('price')
     for p in products:
         writer.writerow([p.product_group.name, p.source.name, p.url, floatformat(p.price, 2)])
         

@@ -20,11 +20,13 @@ table {
     font-size:14px; 
 }
 
-th { text-align:center; }
+tr.name { background-color:#333; color:#FFF; font-weight:bold; padding:5px; font-size:16px; }
+
+th, tr.head { text-align:center; }
 
 th a { color:#000; }
 
-tr.alt, thead { background-color:#eee; }
+tr.alt, thead, tr.head { background-color:#eee; }
 
 tr.alt.red, tr.norm.red { background-color:#ffa4a4; }
 tr.alt.green, tr.norm.green { background-color:#a4ffa6; }
